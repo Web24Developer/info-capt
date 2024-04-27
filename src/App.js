@@ -6,6 +6,7 @@ function App() {
   const [isEditing,setIsEditing]=useState(false);
   const [records,setRecords]=useState([]);
   const [editingId,setEditingId]=useState(null);
+  const [notification,setNotification]=useState('')
 
   useEffect(()=>{
     fetchData();
@@ -15,28 +16,39 @@ function App() {
 
   const handleSubmit=(e)=>{
     e.preventDefault();
-    //updating the record
+    
     if(isEditing){
+      //updating the record
       fetch(`https://db-infocapture-46e41-default-rtdb.asia-southeast1.firebasedatabase.app/user/${editingId}.json`,{
       method:'PUT',
       header:{'Content-Type':'application/json'},
       body:JSON.stringify(formData)}
     ).then(()=>{ 
-      
+      setNotification('a new record is added');
       setEditingId(null)
       setIsEditing(false)
       setFormData({firstname:'',lastname:'',city:''});
       fetchData();
+      setTimeout(()=>{
+        setNotification('');
+      },3000)
     })
     }else{
-      
+      //adding record
       fetch('https://db-infocapture-46e41-default-rtdb.asia-southeast1.firebasedatabase.app/user.json',{
         method:'POST',
         header:{'Content-Type':'application/json'},
         body:JSON.stringify(formData)
+      }).then(()=>{
+        //display notification
+        setNotification('a new record is added');
+        setFormData({firstname:'',lastname:'',city:''});
+        fetchData();
+        setTimeout(()=>{
+          setNotification('');
+        },3000)
       })
-      fetchData();
-      setEditingId(null)
+      
     }
   }
 
@@ -55,17 +67,29 @@ function App() {
   }
   
   const handleEdit=(record)=>{
+    //
+    setNotification('edit information');
+    setTimeout(()=>{
+      setNotification('');
+    },3000)
     setIsEditing(true);
     setEditingId(record.id);
     setFormData({firstname:record.firstname,lastname:record.lastname,city:record.city});
     
   };
   const handleDelete=(id)=>{
+    
     fetch(`https://db-infocapture-46e41-default-rtdb.asia-southeast1.firebasedatabase.app/user/${id}.json`,{
       method:'DELETE'
-    }
-    )
-  };
+    }).then(()=>{
+      setNotification('deleted a record');
+      setTimeout(()=>{
+        setNotification('');
+      },3000)
+    })
+    //updating the list
+    setRecords(records.filter(record=>record.id !== id));
+  }
   const handleInputChange=(e)=>{
     const {name,value}=e.target;
     setFormData(prevFormData=>({...prevFormData,[name]:value})) ;
@@ -109,7 +133,7 @@ function App() {
         </div>
         <div className='table-container'>
             <h2>DigiPunk World Citizens</h2>
-            <h4 className='notification'>A new record was added</h4>
+            <h4 className='notification'>{notification}</h4>
             <table>
               <thead>
                 <tr>
