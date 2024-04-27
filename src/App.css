@@ -153,7 +153,10 @@ body, .App {
   overflow: auto;
   padding-bottom: 40px; /* Same as footer height to prevent content from being hidden */
 }
-
+.notification{
+  color: #cd1851;
+  font-size: 0.85rem;
+}
 
 
 
